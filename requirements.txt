@@ -1,0 +1,7 @@
+Joblib
+Pandas
+Numpy
+Matplotlib
+Scikit-learn
+Pysimplegui
+Pyinstaller
