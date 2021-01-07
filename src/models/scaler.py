@@ -1,4 +1,4 @@
-from ..types.scalerType import ScalerType
+from ..enums.scalerType import ScalerType
 from ..helpers.scalerHelper import ScalerHelper
 from pandas import DataFrame
 from numpy import ndarray
