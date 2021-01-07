@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class GuiState(Enum):
-    TrainModel = 0
-    Predict = 1
-    Output = 2
+    GenerateData = 0
+    TrainModel = 1
+    Predict = 2
+    Output = 3

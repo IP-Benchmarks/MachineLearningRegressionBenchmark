@@ -5,3 +5,4 @@ Matplotlib
 Scikit-learn
 Pysimplegui
 Pyinstaller
+Sympy
