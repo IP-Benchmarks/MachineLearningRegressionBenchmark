@@ -92,30 +92,31 @@ class Gui:
 
     def createLayout(self):
         return [
-            [sg.Text('Number of variables:', size=(20, 1)),
-             sg.Input(size=(88, 1), key='numberOfVariables'),
+            [sg.Text('Maximum coefficient:', size=(20, 1)),
+             sg.Input(size=(20, 1), key='maxCoeff'),
+             sg.Text(size=(20, 1)),
+             sg.Text('Maximum exponent:', size=(20, 1)),
+             sg.Input(size=(20, 1), key='maxExp'),
+             sg.Text(size=(30, 1)),
              sg.Button(size=(20, 1), button_color=("white", "black"),
                        button_text="Update",  key='updateValues'),
              sg.Button(size=(20, 1), button_color=("white", "black"),
                        button_text="Randomize",  key='randomizeValues')
              ],
-            [sg.Text('Maximum coefficient:', size=(20, 1)),
-             sg.Input(size=(20, 1), key='maxCoeff'),
-             sg.Text(size=(16, 1)),
-             sg.Text('Maximum exponent:', size=(20, 1)),
-             sg.Input(size=(20, 1), key='maxExp'),
-             ],
             [sg.Text('Regression model:', size=(20, 1))]
             + [sg.Radio(model.name, "radio_group1",
                         key="model" + str(model.value)) for model in ModelType],
 
+            [sg.Text('Number of variables:', size=(20, 1)),
+             sg.Input(size=(20, 1), key='numberOfVariables'),
+             ],
             self.createParameterLayout('coeff', 'Coefficients:'),
             self.createParameterLayout('exp', 'Exponents:'),
             [sg.Text('Resulting function:', size=(20, 2)),
              sg.Text('', key='resultingFunction', size=(120, 2))
              ],
-            [sg.Text(size=(60, 1)),
-             sg.Text(size=(59, 1)),
+            [sg.Text(size=(77, 1)),
+             sg.Text(size=(77, 1)),
              sg.Col([[sg.Button(size=(20, 1), button_color=(
                  "white", "black"), button_text="Start",  key='action', visible=False)]])
 
@@ -127,7 +128,7 @@ class Gui:
         return sg.Col([[sg.Input(*args, **kwargs)]], pad=(0, 0))
 
     def createParameterLayout(self, parameterName, title):
-        arr = [self.inputColumn(size=(5, 1), key=f'{parameterName}{x}', visible=False)
+        arr = [self.inputColumn(size=(7, 1), key=f'{parameterName}{x}', visible=False)
                for x in range(self._maxNumberOfVariables)]
         arr.insert(0, sg.Text(
             title, size=(20, 1), key=parameterName, visible=True))
@@ -223,5 +224,7 @@ class Gui:
         self._numberOfVariables = RandomHelper.randomInt(
             self._minNumberOfVariables, self._maxNumberOfVariables)
         for x in range(self._numberOfVariables):
-            self._parametersArr[x]['coeff'] = RandomHelper.randomFloat(500)
-            self._parametersArr[x]['exp'] = RandomHelper.randomFloat(10)
+            self._parametersArr[x]['coeff'] = RandomHelper.randomFloat(
+                self._maxCoeff)
+            self._parametersArr[x]['exp'] = RandomHelper.randomFloat(
+                self._maxExp)
