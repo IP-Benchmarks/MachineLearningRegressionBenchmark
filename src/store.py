@@ -1,5 +1,6 @@
 from models.dataset import Dataset
 from models.model import Model
+from models.scaler import Scaler
 from pandas import DataFrame
 
 
@@ -20,4 +21,5 @@ class Store:
     dataFrame: DataFrame = None
 
     dataSet: Dataset = None
+    scaler: Scaler = None
     model: Model = None
