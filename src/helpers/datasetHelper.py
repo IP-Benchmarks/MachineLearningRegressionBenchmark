@@ -1,7 +1,26 @@
 from pandas import DataFrame, read_csv, set_option, reset_option
+import numpy as np
+from ..store import Store
+from .randomHelper import RandomHelper
 
 
 class DatasetHelper:
+
+    @staticmethod
+    def generateDataset(store: Store):
+        arr = []
+
+        for _ in range(store.numberOfSamples):
+            noise = RandomHelper.randomFloat(min, max)
+            variablesArr = [RandomHelper.randomFloat(min, max)
+                            for _ in range(store.numberOfVariables)]
+            y = sum([store.parametersArr[idx]['coeff'] * variablesArr[idx]
+                     ** store.parametersArr[idx]['exp'] for idx in range(store.numberOfVariables)]) + noise
+            variablesArr.append(y)
+            arr.append(variablesArr)
+
+        numpyArr = np.array(arr)
+        store.dataFrame = DataFrame(data=numpyArr, columns=store.features)
 
     @staticmethod
     def readCsv(path: str) -> DataFrame:
