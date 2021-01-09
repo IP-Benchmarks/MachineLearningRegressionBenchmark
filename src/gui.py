@@ -1,5 +1,6 @@
 from enums.guiState import GuiState
 from enums.modelType import ModelType
+# from models.dataset import Dataset
 from store import Store
 from helpers.randomHelper import RandomHelper
 import PySimpleGUI as sg
@@ -48,6 +49,7 @@ class Gui:
         self._window['maxExp'].update(self._store.maxExp)
         self._window['minValue'].update(self._store.minValue)
         self._window['maxValue'].update(self._store.maxValue)
+        self._window['numberOfSamples'].update(self._store.numberOfSamples)
         self.updateDisplayedModel(self._selectedModel)
         while True:  # Event Loop
             event, values = self._window.read(timeout=10)
@@ -107,7 +109,10 @@ class Gui:
                 sg.Input(size=(20, 1), key='minValue'),
                 sg.Text(size=(20, 1)),
                 sg.Text('Domain maximum value:', size=(20, 1)),
-                sg.Input(size=(20, 1), key='maxValue')
+                sg.Input(size=(20, 1), key='maxValue'),
+                sg.Text(size=(20, 1)),
+                sg.Text('Number of samples:', size=(20, 1)),
+                sg.Input(size=(20, 1), key='numberOfSamples')
             ],
             [
                 sg.Text('Regression model:', size=(20, 1))
@@ -134,7 +139,7 @@ class Gui:
         ]
 
     # Workaround for tkinker bug that missaligns invisible items
-    def inputColumn(*args, **kwargs):
+    def inputColumn(self, *args, **kwargs):
         return sg.Col([[sg.Input(*args, **kwargs)]], pad=(0, 0))
 
     def createParameterLayout(self, parameterName, title):
@@ -181,6 +186,11 @@ class Gui:
             self._store.maxValue = int(values['maxValue'])
         except:
             self._window['maxValue'].update(self._store.maxValue)
+
+        try:
+            self._store.numberOfSamples = int(values['numberOfSamples'])
+        except:
+            self._window['numberOfSamples'].update(self._store.numberOfSamples)
 
         for model in self._models:
             if values[model["key"]]:
