@@ -1,23 +1,19 @@
 from enums.guiState import GuiState
 from enums.modelType import ModelType
+from store import Store
 from helpers.randomHelper import RandomHelper
 import PySimpleGUI as sg
 import random
 
 
 class Gui:
-    _models = [{"key": "model" + str(x.value), "value": x}
-               for x in ModelType]
-    _maxNumberOfVariables = 20
-    _minNumberOfVariables = 1
-    _numberOfVariables = None
-    _maxCoeff = 500
-    _maxExp = 10
-    _selectedModel = ModelType.LinearRegression
-    _parametersArr = [{'exp': 1, 'coeff': 1}
-                      for _ in range(_maxNumberOfVariables)]
+    _store = Store()
     _window = None
     _state = GuiState.GenerateData
+
+    _models = [{"key": "model" + str(x.value), "value": x}
+               for x in ModelType]
+    _selectedModel = ModelType.LinearRegression
     _subscriptMap = {
         "0": "₀",
         "1": "₁",
@@ -47,9 +43,11 @@ class Gui:
         self._window = sg.Window('Regression Benchmark', self.createLayout(),
                                  icon="./assets/ico.ico", finalize=True)
         self._window.read(timeout=10)
-        self._window['numberOfVariables'].update(self._numberOfVariables)
-        self._window['maxCoeff'].update(self._maxCoeff)
-        self._window['maxExp'].update(self._maxExp)
+        self._window['numberOfVariables'].update(self._store.numberOfVariables)
+        self._window['maxCoeff'].update(self._store.maxCoeff)
+        self._window['maxExp'].update(self._store.maxExp)
+        self._window['minValue'].update(self._store.minValue)
+        self._window['maxValue'].update(self._store.maxValue)
         self.updateDisplayedModel(self._selectedModel)
         while True:  # Event Loop
             event, values = self._window.read(timeout=10)
@@ -92,35 +90,47 @@ class Gui:
 
     def createLayout(self):
         return [
-            [sg.Text('Maximum coefficient:', size=(20, 1)),
-             sg.Input(size=(20, 1), key='maxCoeff'),
-             sg.Text(size=(20, 1)),
-             sg.Text('Maximum exponent:', size=(20, 1)),
-             sg.Input(size=(20, 1), key='maxExp'),
-             sg.Text(size=(30, 1)),
-             sg.Button(size=(20, 1), button_color=("white", "black"),
-                       button_text="Update",  key='updateValues'),
-             sg.Button(size=(20, 1), button_color=("white", "black"),
-                       button_text="Randomize",  key='randomizeValues')
-             ],
-            [sg.Text('Regression model:', size=(20, 1))]
-            + [sg.Radio(model.name, "radio_group1",
-                        key="model" + str(model.value)) for model in ModelType],
-
-            [sg.Text('Number of variables:', size=(20, 1)),
-             sg.Input(size=(20, 1), key='numberOfVariables'),
-             ],
+            [
+                sg.Text('Maximum coefficient:', size=(20, 1)),
+                sg.Input(size=(20, 1), key='maxCoeff'),
+                sg.Text(size=(20, 1)),
+                sg.Text('Maximum exponent:', size=(20, 1)),
+                sg.Input(size=(20, 1), key='maxExp'),
+                sg.Text(size=(30, 1)),
+                sg.Button(size=(20, 1), button_color=("white", "black"),
+                          button_text="Update",  key='updateValues'),
+                sg.Button(size=(20, 1), button_color=("white", "black"),
+                          button_text="Randomize",  key='randomizeValues')
+            ],
+            [
+                sg.Text('Domain minimum value:', size=(20, 1)),
+                sg.Input(size=(20, 1), key='minValue'),
+                sg.Text(size=(20, 1)),
+                sg.Text('Domain maximum value:', size=(20, 1)),
+                sg.Input(size=(20, 1), key='maxValue')
+            ],
+            [
+                sg.Text('Regression model:', size=(20, 1))
+            ] + [
+                sg.Radio(model.name, "radio_group1",
+                         key="model" + str(model.value)) for model in ModelType
+            ],
+            [
+                sg.Text('Number of variables:', size=(20, 1)),
+                sg.Input(size=(20, 1), key='numberOfVariables'),
+            ],
             self.createParameterLayout('coeff', 'Coefficients:'),
             self.createParameterLayout('exp', 'Exponents:'),
-            [sg.Text('Resulting function:', size=(20, 2)),
-             sg.Text('', key='resultingFunction', size=(120, 2))
-             ],
-            [sg.Text(size=(77, 1)),
-             sg.Text(size=(77, 1)),
-             sg.Col([[sg.Button(size=(20, 1), button_color=(
-                 "white", "black"), button_text="Start",  key='action', visible=False)]])
-
-             ]
+            [
+                sg.Text('Resulting function:', size=(20, 2)),
+                sg.Text('', key='resultingFunction', size=(120, 2))
+            ],
+            [
+                sg.Text(size=(77, 1)),
+                sg.Text(size=(77, 1)),
+                sg.Col([[sg.Button(size=(20, 1), button_color=(
+                    "white", "black"), button_text="Start",  key='action', visible=False)]])
+            ]
         ]
 
     # Workaround for tkinker bug that missaligns invisible items
@@ -129,7 +139,7 @@ class Gui:
 
     def createParameterLayout(self, parameterName, title):
         arr = [self.inputColumn(size=(7, 1), key=f'{parameterName}{x}', visible=False)
-               for x in range(self._maxNumberOfVariables)]
+               for x in range(self._store.maxNumberOfVariables)]
         arr.insert(0, sg.Text(
             title, size=(20, 1), key=parameterName, visible=True))
 
@@ -138,28 +148,39 @@ class Gui:
     def updateValues(self, values):
         try:
             temp = int(values['numberOfVariables'])
-            if(temp != self._numberOfVariables):
-                self._numberOfVariables = temp
+            if(temp != self._store.numberOfVariables):
+                self._store.numberOfVariables = temp
 
-                if(self._numberOfVariables > self._maxNumberOfVariables):
-                    self._numberOfVariables = self._maxNumberOfVariables
+                if(self._store.numberOfVariables > self._store.maxNumberOfVariables):
+                    self._store.numberOfVariables = self._store.maxNumberOfVariables
 
-                elif self._numberOfVariables < self._minNumberOfVariables:
-                    self._numberOfVariables = self._minNumberOfVariables
+                elif self._store.numberOfVariables < self._store.minNumberOfVariables:
+                    self._store.numberOfVariables = self._store.minNumberOfVariables
 
         except:
-            self._numberOfVariables = self._minNumberOfVariables
+            self._store.numberOfVariables = self._store.minNumberOfVariables
         finally:
             self.updateDisplayedValues()
 
         try:
-            self._maxCoeff = float(values['maxCoeff'])
+            self._store.maxCoeff = float(values['maxCoeff'])
         except:
-            self._window['maxCoeff'].update(self._maxCoeff)
+            self._window['maxCoeff'].update(self._store.maxCoeff)
+
         try:
-            self._maxExp = float(values['maxExp'])
+            self._store.maxExp = float(values['maxExp'])
         except:
-            self._window['maxExp'].update(self._maxExp)
+            self._window['maxExp'].update(self._store.maxExp)
+
+        try:
+            self._store.minValue = int(values['minValue'])
+        except:
+            self._window['minValue'].update(self._store.minValue)
+
+        try:
+            self._store.maxValue = int(values['maxValue'])
+        except:
+            self._window['maxValue'].update(self._store.maxValue)
 
         for model in self._models:
             if values[model["key"]]:
@@ -173,7 +194,7 @@ class Gui:
                 self._window[model["key"]].update(False)
 
     def updateDisplayedValues(self):
-        self._window['numberOfVariables'].update(self._numberOfVariables)
+        self._window['numberOfVariables'].update(self._store.numberOfVariables)
         self.updateParameterVisibility('coeff')
         self.updateParameterVisibility('exp')
 
@@ -182,38 +203,38 @@ class Gui:
         self.updateResultingFunction()
 
     def updateDisplayedParameterValues(self, parameterName):
-        for x in range(self._maxNumberOfVariables):
+        for x in range(self._store.maxNumberOfVariables):
             self._window[f'{parameterName}{x}'].update(
-                self._parametersArr[x][parameterName])
+                self._store.parametersArr[x][parameterName])
 
     def updateParameterVisibility(self, parameterName):
-        for x in range(self._numberOfVariables):
+        for x in range(self._store.numberOfVariables):
             self._window[f'{parameterName}{x}'].update(visible=True)
 
-        for x in range(self._numberOfVariables, self._maxNumberOfVariables):
+        for x in range(self._store.numberOfVariables, self._store.maxNumberOfVariables):
             self._window[f'{parameterName}{x}'].update(visible=False)
 
     def updateParameterValues(self, parameterName, values):
-        for x in range(self._maxNumberOfVariables):
+        for x in range(self._store.maxNumberOfVariables):
             try:
-                self._parametersArr[x][parameterName] = int(
+                self._store.parametersArr[x][parameterName] = int(
                     values[f'{parameterName}{x}'])
             except ValueError:
                 try:
-                    self._parametersArr[x][parameterName] = float(
+                    self._store.parametersArr[x][parameterName] = float(
                         values[f'{parameterName}{x}'])
                 except:
                     self._window[f'{parameterName}{x}'].update(1)
 
     def updateResultingFunction(self):
         resultingFunction = ''
-        for x in range(self._numberOfVariables):
-            coeff = self._parametersArr[x]['coeff']
+        for x in range(self._store.numberOfVariables):
+            coeff = self._store.parametersArr[x]['coeff']
             if(coeff > 0 and x > 0):
                 resultingFunction += ' + '
             resultingFunction += f'{coeff}X{self._subscriptMap[f"{x}"]}^'
 
-            exp = self._parametersArr[x]['exp']
+            exp = self._store.parametersArr[x]['exp']
             if(exp < 0):
                 resultingFunction += '-'
 
@@ -221,10 +242,13 @@ class Gui:
         self._window['resultingFunction'].update(resultingFunction)
 
     def randomizeValues(self):
-        self._numberOfVariables = RandomHelper.randomInt(
-            self._minNumberOfVariables, self._maxNumberOfVariables)
-        for x in range(self._numberOfVariables):
-            self._parametersArr[x]['coeff'] = RandomHelper.randomFloat(
-                self._maxCoeff)
-            self._parametersArr[x]['exp'] = RandomHelper.randomFloat(
-                self._maxExp)
+        self._store.numberOfVariables = RandomHelper.randomInt(
+            self._store.minNumberOfVariables, self._store.maxNumberOfVariables)
+        for x in range(self._store.numberOfVariables):
+            self._store.parametersArr[x]['coeff'] = RandomHelper.randomFloat(
+                self._store.maxCoeff)
+            self._store.parametersArr[x]['exp'] = RandomHelper.randomFloat(
+                self._store.maxExp)
+
+    def createDataset(self):
+        pass
