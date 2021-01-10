@@ -69,7 +69,7 @@ class Build:
             self.command.append('--icon=./src/assets/ico.icns')
             self.command.append('--add-data=./src/assets/ico.ico:./assets/')
 
-        self.command.append('src/main.py')
+        self.command.append('./main.py')
 
         self.removeTree(self.packageName)
         PyInstaller.__main__.run(self.command)
