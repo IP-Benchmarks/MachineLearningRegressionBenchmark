@@ -9,7 +9,6 @@ from src.models.scaler import Scaler
 from src.store import Store
 from src.helpers.randomHelper import RandomHelper
 import PySimpleGUI as sg
-import random
 
 
 class Gui:
@@ -74,17 +73,17 @@ class Gui:
                 self._state = GuiState.GenerateData
 
             if event == 'action':
-                if(self._state == GuiState.GenerateData):
+                if self._state == GuiState.GenerateData:
                     self._window['action'].update("Generating...")
                     self.generateData()
                     self._window['action'].update("Train Model")
                     self._state = GuiState.TrainModel
-                elif(self._state == GuiState.TrainModel):
+                elif self._state == GuiState.TrainModel:
                     self._window['action'].update("Training...")
                     self.trainModel()
                     self._window['action'].update("Test")
                     self._state = GuiState.Test
-                elif(self._state == GuiState.Test):
+                elif self._state == GuiState.Test:
                     self._window['action'].update("Testing...")
                     self.testModel()
                     self._window['action'].update("Show output")
@@ -104,9 +103,9 @@ class Gui:
                 sg.Input(size=(20, 1), key='maxExp'),
                 sg.Text(size=(30, 1)),
                 sg.Button(size=(20, 1), button_color=("white", "black"),
-                          button_text="Update",  key='updateValues'),
+                          button_text="Update", key='updateValues'),
                 sg.Button(size=(20, 1), button_color=("white", "black"),
-                          button_text="Randomize",  key='randomizeValues')
+                          button_text="Randomize", key='randomizeValues')
             ],
             [
                 sg.Text('Domain minimum value:', size=(20, 1)),
@@ -121,8 +120,7 @@ class Gui:
             [
                 sg.Text('Regression model:', size=(20, 1))
             ] + [
-                sg.Radio(model.name, "radio_group1",
-                         key="model" + str(model.value)) for model in ModelType
+                sg.Radio(model.name, "radio_group1",key="model" + str(model.value)) for model in ModelType
             ],
             [
                 sg.Text('Number of variables:', size=(20, 1)),
@@ -138,29 +136,29 @@ class Gui:
                 sg.Text(size=(77, 1)),
                 sg.Text(size=(77, 1)),
                 sg.Col([[sg.Button(size=(20, 1), button_color=(
-                    "white", "black"), button_text="Start",  key='action', visible=False)]])
+                    "white", "black"), button_text="Start", key='action', visible=False)]])
             ]
         ]
 
     # Workaround for tkinker bug that missaligns invisible items
-    def inputColumn(self, *args, **kwargs):
+    @staticmethod
+    def inputColumn(*args, **kwargs):
         return sg.Col([[sg.Input(*args, **kwargs)]], pad=(0, 0))
 
     def createParameterLayout(self, parameterName, title):
         arr = [self.inputColumn(size=(7, 1), key=f'{parameterName}{x}', visible=False)
                for x in range(self._store.maxNumberOfVariables)]
-        arr.insert(0, sg.Text(
-            title, size=(20, 1), key=parameterName, visible=True))
+        arr.insert(0, sg.Text(title, size=(20, 1), key=parameterName, visible=True))
 
         return arr
 
     def updateValues(self, values):
         try:
             temp = int(values['numberOfVariables'])
-            if(temp != self._store.numberOfVariables):
+            if (temp != self._store.numberOfVariables):
                 self._store.numberOfVariables = temp
 
-                if(self._store.numberOfVariables > self._store.maxNumberOfVariables):
+                if (self._store.numberOfVariables > self._store.maxNumberOfVariables):
                     self._store.numberOfVariables = self._store.maxNumberOfVariables
 
                 elif self._store.numberOfVariables < self._store.minNumberOfVariables:
@@ -202,7 +200,7 @@ class Gui:
 
     def updateDisplayedModel(self, value):
         for model in self._models:
-            if(model["value"] == value):
+            if model["value"] == value:
                 self._window[model["key"]].update(True)
             else:
                 self._window[model["key"]].update(False)
@@ -244,12 +242,12 @@ class Gui:
         resultingFunction = ''
         for x in range(self._store.numberOfVariables):
             coeff = self._store.parametersArr[x]['coeff']
-            if(coeff > 0 and x > 0):
+            if coeff > 0 and x > 0:
                 resultingFunction += ' + '
             resultingFunction += f'{coeff}X{self._subscriptMap[f"{x}"]}^'
 
             exp = self._store.parametersArr[x]['exp']
-            if(exp < 0):
+            if exp < 0:
                 resultingFunction += '-'
 
             resultingFunction += f'{exp}'
@@ -265,25 +263,26 @@ class Gui:
                 self._store.maxExp)
 
     def generateData(self):
-        DatasetHelper.generateDataset()
+        DatasetHelper.generateDataset(self._store)
         self._store.dataSet = Dataset(
-            self._store.label, dataset=self._store.dataFrame)
-        self.store.scaler = Scaler(
+            self._store.label, self._store.dataFrame)
+        self._store.scaler = Scaler(
             ScalerType.StandardScaler, self._store.dataSet.getFeatureData())
 
     def trainModel(self):
-        X = self.store.scaler.transform(self._store.dataSet.getFeatureData())
+        X = self._store.scaler.transform(self._store.dataSet.getFeatureData())
         y = self._store.dataSet.getLabelData()
 
         self._store.model = Model(self._selectedModel, X, y)
 
     def testModel(self):
-        X = self.store.scaler.transform(self._store.dataSet.getFeatureData())
+        X = self._store.scaler.transform(self._store.dataSet.getFeatureData())
         y = self._store.dataSet.getLabelData()
 
         self._store.model.evaluate(X, y)
 
     def showOutput(self):
         for feature in self._store.features:
-            PlotterHelper.plot(self._store.dataSet.getDataset()[feature], self._store.dataSet.getDataset().getDataset()[self._store.label], feature,
+            PlotterHelper.plot(self._store.dataSet.getDataset()[feature],
+                               self._store.dataSet.getDataset()[self._store.label], feature,
                                self._store.label, self._store.model.getAlgorithmUsed())

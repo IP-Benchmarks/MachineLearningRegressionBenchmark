@@ -12,8 +12,8 @@ class DatasetHelper:
         arr = []
 
         for _ in range(store.numberOfSamples):
-            noise = RandomHelper.randomFloat(store.minValue, store.maxValue)
-            variablesArr = [RandomHelper.randomFloat(store.minValue, store.maxValue)
+            noise = RandomHelper.randomFloatBounded(store.minValue, store.maxValue)
+            variablesArr = [RandomHelper.randomFloatBounded(store.minValue, store.maxValue)
                             for _ in range(store.numberOfVariables)]
             y = sum([store.parametersArr[idx]['coeff'] * variablesArr[idx]
                      ** store.parametersArr[idx]['exp'] for idx in range(store.numberOfVariables)]) + noise
@@ -21,7 +21,9 @@ class DatasetHelper:
             arr.append(variablesArr)
 
         numpyArr = np.array(arr)
-        store.dataFrame = DataFrame(data=numpyArr, columns=store.features)
+        header = store.features
+        header.append(store.label)
+        store.dataFrame = DataFrame(data=numpyArr, columns=header)
 
     @staticmethod
     def readCsv(path: str) -> DataFrame:

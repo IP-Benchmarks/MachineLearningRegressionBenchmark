@@ -21,7 +21,7 @@ class Store:
     model: Model = None
 
     label = 'Y'
-    
+
     @property
     def features(self):
         return [f'X{x}' for x in range(self.numberOfVariables)]

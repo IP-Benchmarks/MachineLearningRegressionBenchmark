@@ -2,21 +2,14 @@ import copy
 from pandas import DataFrame, concat
 from numpy import array, ndarray
 
-from src.helpers.datasetHelper import DatasetHelper
-
 
 class Dataset:
     _dataFrame: DataFrame
     _label: str
 
-    def __init__(self, label: str, path: str = '', dataFrame: DataFrame = None):
-        if path:
-            self._dataFrame = DatasetHelper.readCsv(path)
-        else:
-            self._dataFrame = dataFrame
-
+    def __init__(self, label: str, dataFrame: DataFrame):
+        self._dataFrame = dataFrame
         self._label = label
-
         self.prepareDataset()
 
     def getDataset(self):
@@ -32,6 +25,7 @@ class Dataset:
 
     def prepareDataset(self):
         """Modifies the dataset object with a user defined logic"""
+        from src.helpers.datasetHelper import DatasetHelper
         self._dataFrame = DatasetHelper.prepareDataset(self.getDatasetCopy())
 
     def getFeatureData(self):
