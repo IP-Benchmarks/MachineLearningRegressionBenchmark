@@ -1,10 +1,10 @@
 # MachineLearningRegressionBenchmark
 
-The benchmark of regression algorithms using an agent with learning capabilities on a non linear function with noise .
+This repository holds benchmark for regression algorithms using an agent with learning capabilities on a non linear function affected by noise.
 
 # Introduction
 
-This application is developed using python 3+. To be able to run it you need to install the packages from [requirements.txt](https://github.com/IulianOctavianPreda/MachineLearningRegressionBenchmark/blob/master/requirements.txt). You can install them using:
+This application is developed using python 3.7+. To be able to run it you need to install the packages from [requirements.txt](https://github.com/IulianOctavianPreda/MachineLearningRegressionBenchmark/blob/master/requirements.txt). You can install them using:
 
 `$ pip install -r requirements.txt`
 
@@ -24,7 +24,7 @@ The code is split in multiple packages:
 
 -   main - the main entry point in the application
 -   src - package containing the main classes used by the application
--   types - contains the types used by the scaler and models
+-   enums - contains the enums used by the gui, scaler and models
 -   helpers - is the package that contains static methods useful for the classes found in the src package
 
 # Application flow
