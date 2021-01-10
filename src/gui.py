@@ -1,3 +1,6 @@
+import PySimpleGUI as sg
+from operator import itemgetter
+
 from src.enums.guiState import GuiState
 from src.enums.modelType import ModelType
 from src.enums.scalerType import ScalerType
@@ -8,7 +11,6 @@ from src.models.model import Model
 from src.models.scaler import Scaler
 from src.store import Store
 from src.helpers.randomHelper import RandomHelper
-import PySimpleGUI as sg
 
 
 class Gui:
@@ -70,7 +72,11 @@ class Gui:
             if event == 'updateValues' or event == 'randomizeValues':
                 self._window['action'].update("Generate data")
                 self._window['action'].update(visible=True)
+                self._window['runall'].update(visible=True)
                 self._state = GuiState.GenerateData
+
+            if event == 'runall':
+                self.runAllModels()
 
             if event == 'action':
                 if self._state == GuiState.GenerateData:
@@ -85,7 +91,7 @@ class Gui:
                     self._state = GuiState.Test
                 elif self._state == GuiState.Test:
                     self._window['action'].update("Testing...")
-                    self.testModel()
+                    self._window['score'].update(self.testModel())
                     self._window['action'].update("Show output")
                     self._state = GuiState.Output
                 else:
@@ -120,7 +126,7 @@ class Gui:
             [
                 sg.Text('Regression model:', size=(20, 1))
             ] + [
-                sg.Radio(model.name, "radio_group1",key="model" + str(model.value)) for model in ModelType
+                sg.Radio(model.name, "radio_group1", key="model" + str(model.value)) for model in ModelType
             ],
             [
                 sg.Text('Number of variables:', size=(20, 1)),
@@ -133,10 +139,20 @@ class Gui:
                 sg.Text('', key='resultingFunction', size=(120, 2))
             ],
             [
+                sg.Text('Regression score:', size=(20, 2)),
+                sg.Text('', key='score', size=(120, 2))
+            ],
+            [
                 sg.Text(size=(77, 1)),
                 sg.Text(size=(77, 1)),
-                sg.Col([[sg.Button(size=(20, 1), button_color=(
-                    "white", "black"), button_text="Start", key='action', visible=False)]])
+                sg.Col([
+                    [
+                        sg.Button(size=(20, 1), button_color=(
+                            "white", "black"), button_text="Auto run all models", key='runall', visible=False),
+                        sg.Button(size=(20, 1), button_color=(
+                            "white", "black"), button_text="Start", key='action', visible=False)
+                    ]
+                ])
             ]
         ]
 
@@ -148,7 +164,8 @@ class Gui:
     def createParameterLayout(self, parameterName, title):
         arr = [self.inputColumn(size=(7, 1), key=f'{parameterName}{x}', visible=False)
                for x in range(self._store.maxNumberOfVariables)]
-        arr.insert(0, sg.Text(title, size=(20, 1), key=parameterName, visible=True))
+        arr.insert(0, sg.Text(title, size=(20, 1),
+                              key=parameterName, visible=True))
 
         return arr
 
@@ -167,6 +184,8 @@ class Gui:
         except:
             self._store.numberOfVariables = self._store.minNumberOfVariables
         finally:
+            self.updateParameterValues('coeff', values)
+            self.updateParameterValues('exp', values)
             self.updateDisplayedValues()
 
         try:
@@ -238,7 +257,7 @@ class Gui:
                 except:
                     self._window[f'{parameterName}{x}'].update(1)
 
-    def updateResultingFunction(self):
+    def resultingFunction(self):
         resultingFunction = ''
         for x in range(self._store.numberOfVariables):
             coeff = self._store.parametersArr[x]['coeff']
@@ -251,7 +270,11 @@ class Gui:
                 resultingFunction += '-'
 
             resultingFunction += f'{exp}'
-        self._window['resultingFunction'].update(resultingFunction)
+        self._store.resultingFunction = resultingFunction
+
+    def updateResultingFunction(self):
+        self.resultingFunction()
+        self._window['resultingFunction'].update(self._store.resultingFunction)
 
     def randomizeValues(self):
         self._store.numberOfVariables = RandomHelper.randomInt(
@@ -267,22 +290,41 @@ class Gui:
         self._store.dataSet = Dataset(
             self._store.label, self._store.dataFrame)
         self._store.scaler = Scaler(
-            ScalerType.StandardScaler, self._store.dataSet.getFeatureData())
+            ScalerType.StandardScaler, self._store.dataSet.getFeaturesData())
 
-    def trainModel(self):
-        X = self._store.scaler.transform(self._store.dataSet.getFeatureData())
+    def trainModel(self, model: ModelType = None):
+        X = self._store.scaler.transform(self._store.dataSet.getFeaturesData())
         y = self._store.dataSet.getLabelData()
-
-        self._store.model = Model(self._selectedModel, X, y)
+        if model == None:
+            self._store.model = Model(self._selectedModel, X, y)
+        else:
+            self._store.model = Model(model, X, y)
 
     def testModel(self):
-        X = self._store.scaler.transform(self._store.dataSet.getFeatureData())
+        X = self._store.scaler.transform(self._store.dataSet.getFeaturesData())
         y = self._store.dataSet.getLabelData()
 
-        self._store.model.evaluate(X, y)
+        return round(self._store.model.evaluate(X, y), 2)
 
-    def showOutput(self):
-        for feature in self._store.features:
-            PlotterHelper.plot(self._store.dataSet.getDataset()[feature],
-                               self._store.dataSet.getDataset()[self._store.label], feature,
-                               self._store.label, self._store.model.getAlgorithmUsed())
+    def showOutput(self, show=True):
+        PlotterHelper.plotFormula(
+            self._store, self._store.model.getAlgorithmUsed(), show)
+
+    def runAllModels(self):
+        self.generateData()
+        scores = {}
+        figures = []
+        for model in self._models:
+            self.trainModel(model['value'])
+            scores[self._store.model.getAlgorithmUsed()] = self.testModel()
+            figures.append(self.showOutput(False))
+
+        figures.append(PlotterHelper.plotEvaluations(list(map(itemgetter(0), scores.items())),
+                                                     list(
+                                                         map(itemgetter(1), scores.items())),
+                                                     'All scores'))
+        self._window['score'].update(' '.join(str(e) for e in scores.values()))
+        print(figures)
+        # for figure in figures:
+        # figure.show()
+        PlotterHelper.show()

@@ -12,11 +12,13 @@ class DatasetHelper:
         arr = []
 
         for _ in range(store.numberOfSamples):
-            noise = RandomHelper.randomFloatBounded(store.minValue, store.maxValue)
+            noise = RandomHelper.randomFloatBounded(
+                store.minValue, store.maxValue)
             variablesArr = [RandomHelper.randomFloatBounded(store.minValue, store.maxValue)
                             for _ in range(store.numberOfVariables)]
             y = sum([store.parametersArr[idx]['coeff'] * variablesArr[idx]
                      ** store.parametersArr[idx]['exp'] for idx in range(store.numberOfVariables)]) + noise
+            # print(variablesArr, noise, y)
             variablesArr.append(y)
             arr.append(variablesArr)
 

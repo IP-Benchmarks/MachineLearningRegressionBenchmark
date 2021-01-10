@@ -17,7 +17,7 @@ class Model:
     def predict(self, data: Union[array, matrix]) -> array:
         return ModelHelper.predict(self._model, data)
 
-    def evaluate(self, X: list, y: list) -> list:
+    def evaluate(self, X: list, y: list) -> float:
         return ModelHelper.score(self._model, X, y)
 
     def getAlgorithmUsed(self):

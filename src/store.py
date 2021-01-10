@@ -15,6 +15,7 @@ class Store:
     numberOfSamples = 1000
     parametersArr = [{'exp': 1, 'coeff': 1}
                      for _ in range(maxNumberOfVariables)]
+    resultingFunction = ''
     dataFrame: DataFrame = None
     dataSet: Dataset = None
     scaler: Scaler = None
@@ -25,4 +26,3 @@ class Store:
     @property
     def features(self):
         return [f'X{x}' for x in range(self.numberOfVariables)]
-

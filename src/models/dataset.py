@@ -28,9 +28,13 @@ class Dataset:
         from src.helpers.datasetHelper import DatasetHelper
         self._dataFrame = DatasetHelper.prepareDataset(self.getDatasetCopy())
 
-    def getFeatureData(self):
+    def getFeaturesData(self):
         """Gets the data held in the feature columns"""
         return array(self._dataFrame.drop([self._label], 1))
+
+    def getFeatureData(self, feature: str):
+        """Gets the data held in the feature columns"""
+        return array(self._dataFrame[feature])
 
     def getLabelData(self):
         return array(self._dataFrame[self._label])

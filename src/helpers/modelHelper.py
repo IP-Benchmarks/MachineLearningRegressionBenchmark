@@ -14,9 +14,7 @@ class ModelHelper:
         """Returns the training model based on the selected type"""
         _models = {
             ModelType.LinearRegression: LinearRegression(n_jobs=-1),
-            ModelType.ARDRegression: ARDRegression(),
-            ModelType.PassiveAggressiveRegressor: PassiveAggressiveRegressor(),
-            ModelType.TheilSenRegressor: TheilSenRegressor(n_jobs=-1),
+            # ModelType.PassiveAggressiveRegressor: PassiveAggressiveRegressor(),
             ModelType.DecisionTreeRegressor: DecisionTreeRegressor()
         }
 
@@ -45,7 +43,7 @@ class ModelHelper:
         return model.predict(data)
 
     @staticmethod
-    def score(model, X, y, testSize: float = 0.2) -> list:
+    def score(model, X, y, testSize: float = 0.2) -> float:
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=testSize)
-        return model.score(X_test, y_test)
+        return model.score(X_test, y_test) * 100
