@@ -69,6 +69,7 @@ class Build:
             self.command.append('--icon=./src/assets/ico.icns')
             self.command.append('--add-data=./src/assets/ico.ico:./assets/')
 
+        self.command.append('--hidden-import=pandas')
         self.command.append('./main.py')
 
         self.removeTree(self.packageName)

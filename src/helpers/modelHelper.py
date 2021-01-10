@@ -2,9 +2,8 @@ import joblib
 from sklearn.model_selection import train_test_split
 from numpy import array, matrix
 from typing import Union
-from sklearn.linear_model import ARDRegression, PassiveAggressiveRegressor, TheilSenRegressor, LinearRegression
+from sklearn.linear_model import LinearRegression, TweedieRegressor
 from sklearn.tree import DecisionTreeRegressor
-
 from src.enums.modelType import ModelType
 
 
@@ -14,8 +13,7 @@ class ModelHelper:
         """Returns the training model based on the selected type"""
         _models = {
             ModelType.LinearRegression: LinearRegression(n_jobs=-1),
-            # ModelType.PassiveAggressiveRegressor: PassiveAggressiveRegressor(),
-            ModelType.DecisionTreeRegressor: DecisionTreeRegressor()
+            ModelType.DecisionTreeRegressor: DecisionTreeRegressor(),
         }
 
         return _models[modelType]

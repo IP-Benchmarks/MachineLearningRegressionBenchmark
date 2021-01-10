@@ -86,6 +86,7 @@ class Gui:
                 if self._state == GuiState.GenerateData:
                     self._window['action'].update("Generating...")
                     self.generateData()
+                    self.createDataset()
                     self._window['action'].update("Train Model")
                     self._state = GuiState.TrainModel
                 elif self._state == GuiState.TrainModel:
@@ -291,12 +292,13 @@ class Gui:
 
     def generateData(self):
         DatasetHelper.generateDataset(self._store)
-        self._store.dataSet = Dataset(
-            self._store.label, self._store.dataFrame)
-        self._store.scaler = Scaler(
-            ScalerType.StandardScaler, self._store.dataSet.getFeaturesData())
+
+    def createDataset(self):
+        self._store.dataSet = Dataset(self._store.label, self._store.dataFrame)
 
     def trainModel(self, model: ModelType = None):
+        self._store.scaler = Scaler(
+            ScalerType.StandardScaler, self._store.dataSet.getFeaturesData())
         X = self._store.scaler.transform(self._store.dataSet.getFeaturesData())
         y = self._store.dataSet.getLabelData()
         if model == None:
@@ -319,6 +321,7 @@ class Gui:
         scores = {}
         figures = []
         for model in self._models:
+            self.createDataset()
             self.trainModel(model['value'])
             scores[self._store.model.getAlgorithmUsed()] = self.testModel()
             figures.append(self.showOutput(False))
