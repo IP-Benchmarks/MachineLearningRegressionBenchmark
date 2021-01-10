@@ -15,11 +15,14 @@ class Store:
     numberOfSamples = 1000
     parametersArr = [{'exp': 1, 'coeff': 1}
                      for _ in range(maxNumberOfVariables)]
-
-    features = [f'X{x}' for x in range(numberOfVariables)]
-    label = 'Y'
     dataFrame: DataFrame = None
-
     dataSet: Dataset = None
     scaler: Scaler = None
     model: Model = None
+
+    label = 'Y'
+    
+    @property
+    def features(self):
+        return [f'X{x}' for x in range(self.numberOfVariables)]
+
