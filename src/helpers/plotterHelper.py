@@ -22,33 +22,29 @@ class PlotterHelper:
         x = arange(len(names))  # the label locations
         width = 0.35  # the width of the bars
 
-        fig, ax = pyplot.subplots()
-        rects1 = ax.bar(x - width / 2, results, width)
+        rects1 = pyplot.bar(x - width / 2, results, width)
 
         # Add some text for names, title and custom x-axis tick names, etc.
-        ax.set_ylabel('Scores')
-        ax.set_title('Models Scores')
-        ax.set_xticks(x)
-        ax.set_xticklabels(names)
-        pyplot.setp(ax.get_xticklabels(), rotation=30,
-                    horizontalalignment='right')
+        pyplot.ylabel('Scores')
+        pyplot.title('Models Scores')
+        pyplot.xticks(x, names)
 
         def autolabel(rects):
             """Attach a text label above each bar in *rects*, displaying its height."""
             for rect in rects:
                 height = rect.get_height()
-                ax.annotate('{}'.format(height),
-                            xy=(rect.get_x() + rect.get_width() / 2, height),
-                            xytext=(0, -75),  # 3 points vertical offset
-                            textcoords="offset points",
-                            ha='center', va='bottom', rotation=90)
+                pyplot.annotate('{}'.format(height),
+                                xy=(rect.get_x() + rect.get_width() / 2, height),
+                                xytext=(0, -75),  # 3 points vertical offset
+                                textcoords="offset points",
+                                ha='center', va='bottom', rotation=90)
 
         autolabel(rects1)
-        fig.tight_layout()
+        f.tight_layout()
         if show:
             pyplot.show()
         else:
-            return fig
+            return f
 
     @staticmethod
     def plotFormula(store: Store, figure: str, show: bool = False):
