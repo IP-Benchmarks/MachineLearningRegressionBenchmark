@@ -26,3 +26,9 @@ class Store:
     @property
     def features(self):
         return [f'X{x}' for x in range(self.numberOfVariables)]
+
+    def resetDatasetAndModel(self):
+        self.dataFrame: DataFrame = None
+        self.dataSet: Dataset = None
+        self.scaler: Scaler = None
+        self.model: Model = None

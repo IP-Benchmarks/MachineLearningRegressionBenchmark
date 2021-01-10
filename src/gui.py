@@ -76,6 +76,10 @@ class Gui:
                 self._state = GuiState.GenerateData
 
             if event == 'runall':
+                self.updateValues(values)
+                self._store.resetDatasetAndModel()
+                self._state = GuiState.GenerateData
+                self._window['action'].update("Generate data")
                 self.runAllModels()
 
             if event == 'action':
@@ -324,7 +328,4 @@ class Gui:
                                                          map(itemgetter(1), scores.items())),
                                                      'All scores'))
         self._window['score'].update(' '.join(str(e) for e in scores.values()))
-        print(figures)
-        # for figure in figures:
-        # figure.show()
         PlotterHelper.show()
