@@ -1,7 +1,8 @@
-from pandas import DataFrame, read_csv, set_option, reset_option
 import numpy as np
-from ..store import Store
-from .randomHelper import RandomHelper
+from pandas import DataFrame, read_csv, set_option, reset_option
+
+from src.helpers.randomHelper import RandomHelper
+from src.store import Store
 
 
 class DatasetHelper:
@@ -11,8 +12,8 @@ class DatasetHelper:
         arr = []
 
         for _ in range(store.numberOfSamples):
-            noise = RandomHelper.randomFloat(min, max)
-            variablesArr = [RandomHelper.randomFloat(min, max)
+            noise = RandomHelper.randomFloat(store.minValue, store.maxValue)
+            variablesArr = [RandomHelper.randomFloat(store.minValue, store.maxValue)
                             for _ in range(store.numberOfVariables)]
             y = sum([store.parametersArr[idx]['coeff'] * variablesArr[idx]
                      ** store.parametersArr[idx]['exp'] for idx in range(store.numberOfVariables)]) + noise

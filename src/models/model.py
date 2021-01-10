@@ -1,8 +1,8 @@
-from ..helpers.modelHelper import ModelHelper
-from ..enums.modelType import ModelType
 from numpy import array, matrix
 from typing import Union
-from pathlib import Path
+
+from src.enums.modelType import ModelType
+from src.helpers.modelHelper import ModelHelper
 
 
 class Model:

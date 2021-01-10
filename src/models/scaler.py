@@ -1,8 +1,9 @@
-from ..enums.scalerType import ScalerType
-from ..helpers.scalerHelper import ScalerHelper
 from pandas import DataFrame
 from numpy import ndarray
 from typing import Union
+
+from src.enums.scalerType import ScalerType
+from src.helpers.scalerHelper import ScalerHelper
 
 
 class Scaler:

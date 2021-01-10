@@ -1,8 +1,13 @@
-from enums.guiState import GuiState
-from enums.modelType import ModelType
-# from models.dataset import Dataset
-from store import Store
-from helpers.randomHelper import RandomHelper
+from src.enums.guiState import GuiState
+from src.enums.modelType import ModelType
+from src.enums.scalerType import ScalerType
+from src.helpers.datasetHelper import DatasetHelper
+from src.helpers.plotterHelper import PlotterHelper
+from src.models.dataset import Dataset
+from src.models.model import Model
+from src.models.scaler import Scaler
+from src.store import Store
+from src.helpers.randomHelper import RandomHelper
 import PySimpleGUI as sg
 import random
 
@@ -71,22 +76,21 @@ class Gui:
             if event == 'action':
                 if(self._state == GuiState.GenerateData):
                     self._window['action'].update("Generating...")
-                    # model.generateData()
+                    self.generateData()
                     self._window['action'].update("Train Model")
                     self._state = GuiState.TrainModel
                 elif(self._state == GuiState.TrainModel):
                     self._window['action'].update("Training...")
-                    # model.train()
-                    self._window['action'].update("Predict")
-                    self._state = GuiState.Predict
-                elif(self._state == GuiState.Predict):
-                    self._window['action'].update("Predicting...")
-                    # model.predict()
+                    self.trainModel()
+                    self._window['action'].update("Test")
+                    self._state = GuiState.Test
+                elif(self._state == GuiState.Test):
+                    self._window['action'].update("Testing...")
+                    self.testModel()
                     self._window['action'].update("Show output")
                     self._state = GuiState.Output
                 else:
-                    # model.showOutput()
-                    pass
+                    self.showOutput()
 
         self._window.close()
 
@@ -260,5 +264,26 @@ class Gui:
             self._store.parametersArr[x]['exp'] = RandomHelper.randomFloat(
                 self._store.maxExp)
 
-    def createDataset(self):
-        pass
+    def generateData(self):
+        DatasetHelper.generateDataset()
+        self._store.dataSet = Dataset(
+            self._store.label, dataset=self._store.dataFrame)
+        self.store.scaler = Scaler(
+            ScalerType.StandardScaler, self._store.dataSet.getFeatureData())
+
+    def trainModel(self):
+        X = self.store.scaler.transform(self._store.dataSet.getFeatureData())
+        y = self._store.dataSet.getLabelData()
+
+        self._store.model = Model(self._selectedModel, X, y)
+
+    def testModel(self):
+        X = self.store.scaler.transform(self._store.dataSet.getFeatureData())
+        y = self._store.dataSet.getLabelData()
+
+        self._store.model.evaluate(X, y)
+
+    def showOutput(self):
+        for feature in self._store.features:
+            PlotterHelper.plot(self._store.dataSet.getDataset()[feature], self._store.dataSet.getDataset().getDataset()[self._store.label], feature,
+                               self._store.label, self._store.model.getAlgorithmUsed())

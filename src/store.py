@@ -1,6 +1,6 @@
-from models.dataset import Dataset
-from models.model import Model
-from models.scaler import Scaler
+from src.models.dataset import Dataset
+from src.models.model import Model
+from src.models.scaler import Scaler
 from pandas import DataFrame
 
 

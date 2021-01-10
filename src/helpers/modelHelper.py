@@ -1,11 +1,11 @@
-from ..enums.modelType import ModelType
-from sklearn.model_selection import train_test_split, cross_val_score, KFold
+import joblib
+from sklearn.model_selection import train_test_split
 from numpy import array, matrix
 from typing import Union
-from sklearn.linear_model import BayesianRidge, LassoLars, ARDRegression, PassiveAggressiveRegressor, \
-    TheilSenRegressor, LinearRegression
+from sklearn.linear_model import ARDRegression, PassiveAggressiveRegressor, TheilSenRegressor, LinearRegression
 from sklearn.tree import DecisionTreeRegressor
-import joblib
+
+from src.enums.modelType import ModelType
 
 
 class ModelHelper:

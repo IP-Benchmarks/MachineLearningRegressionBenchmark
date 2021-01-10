@@ -1,8 +1,8 @@
-from ..helpers.datasetHelper import DatasetHelper
+import copy
 from pandas import DataFrame, concat
 from numpy import array, ndarray
 
-import copy
+from src.helpers.datasetHelper import DatasetHelper
 
 
 class Dataset:
@@ -42,7 +42,7 @@ class Dataset:
         return array(self._dataFrame[self._label])
 
     def updateLabelData(self, values: ndarray):
-        self._dataset[self._label] = values
+        self._dataFrame[self._label] = values
 
     def addRow(self, row: DataFrame):
-        self._dataset = concat([row, self._dataFrame.iloc[:]])
+        self._dataFrame = concat([row, self._dataFrame.iloc[:]])

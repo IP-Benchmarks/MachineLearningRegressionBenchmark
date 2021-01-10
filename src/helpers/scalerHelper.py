@@ -1,8 +1,9 @@
-from ..enums.scalerType import ScalerType
+import joblib
 from sklearn import preprocessing
 from pandas import DataFrame
 from numpy import array
-import joblib
+
+from src.enums.scalerType import ScalerType
 
 
 class ScalerHelper:
